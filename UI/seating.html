@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Tagging Application</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="css/styles.css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            //alert("I am here");
+            //updateSeats();
+            showSeats();
+
+            function showSeats() {
+                $.ajax({
+                    type: "GET",
+                    dataType: "JSONP",
+                    url: "http://10.129.149.7:7000/getSeats",
+                    //data:'seatNum':TemperatureValue,
+                    success: function(data) {
+                        //alert("I am here");
+                        //console.log(data);
+                        var info = data.split(",");
+                        console.log(info);
+                        for (var i = 0; i < info.length - 1; i++) {
+                            var seatTemp = info[i].split(":");
+                            var obj = $('button[type=button][value=' + seatTemp[0] + ']') // get the dom  element
+                            if (obj != null) {
+                                var temp = parseFloat(seatTemp[1]);
+                                if (temp > 27.0)
+                                    obj.css('background-color', '#f90100');
+                                else if (temp > 26.5 && temp <= 27)
+                                    obj.css('background-color', '#fa7700');
+                                else if (temp > 26.0 && temp <= 26.5)
+                                    obj.css('background-color', '#fbbc00');
+                                else if (temp > 25.5 && temp <= 26.0)
+                                    obj.css('background-color', '#f5d000');
+                                else if (temp > 25.0 && temp <= 25.5)
+                                    obj.css('background-color', '#e9e100');
+                                else if (temp > 24.2 && temp <= 25.0)
+                                    obj.css('background-color', '#c3fe01');
+                                else if (temp >= 23.1 && temp <= 24.2)
+                                    obj.css('background-color', '#41fe00');
+                                else if (temp > 22 && temp < 23.1)
+                                    obj.css('background-color', '#41feab');
+                                else if (temp > 21 && temp <= 22)
+                                    obj.css('background-color', '#41fec4');
+                                else
+                                    obj.css('background-color', '#41fec4');
+                            }
+                        };
+                        //sleep(30000);
+
+                    }
+                });
+            }
+
+            /*function updateSeats() {
+                $.ajax({
+                    type: "GET",
+                    dataType: "JSONP",
+                    url: "http://10.129.149.7:7000/updateSeats",
+                    //data:'seatNum':TemperatureValue,
+                    success: function (data) {
+                        console.log(data);
+                    }
+                });
+            }
+            */
+
+            /*
+                        function getData(tag){
+                        $.ajax({
+                                type: "GET",
+                                dataType: "JSONP",
+                                url: "http://10.129.149.7:7000/getData",
+                                //data:'seatNum':TemperatureValue,
+                                success: function (data) {
+                                    console.log(data);
+                                }
+                            });
+                        }*/
+
+
+
+
+            for (i = 1; i <= 128; i++) {
+                var btn_id = "#tag_btn" + i;
+                console.log(btn_id);
+                $(btn_id).click(function() {
+                    console.log(this.value);
+                    tag = this.value;
+                    //info=getData(tag);
+                    var modalId = "#myModal" + tag;
+
+                    $(modalId).modal();
+
+                });
+            }
+
+
+
+            setInterval(function() {
+                showSeats()
+            }, 30000);
+            //setInterval(function () {
+            //   updateSeats()
+            //}, 80000);
+        });
+
+        var frm = $('#contactForm1');
+        var info;
+        frm.submit(function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: frm.attr('method'),
+                url: frm.attr('action'),
+                data: frm.serialize(),
+                success: function(data) {
+                    console.log('Submission was successful.');
+                    console.log(data);
+                },
+                error: function(data) {
+                    console.log('An error occurred.');
+                    console.log(data);
+                },
+            });
+        });
+
+
+        function generateSeats(offset, count, name) {
+            var seat = "";
+            var modall = "";
+            var i = offset;
+            while (count--) {
+                seat += "<button type=\"button\" class=\"btn btn-default btn-md\" value=\"" + i + "\" id=\"tag_btn" + i + "\" >" + name + "</button>\n";
+                modal_ = "<div class=\"modal fade\" id=\"myModal" + i + "\" role=\"dialog\"> <div class=\"modal-dialog\">";
+                modal_ += "<div class=\"modal-content\"> <div class=\"modal-header\">";
+                modal_ += "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" style=\"box-shadow:none;\">&times;</button>";
+                modal_ += "<h4 class=\"modal-title\">User Feedback</h4> </div>";
+                modal_ += "<div class=\"modal-body\" id=\"modalTemp" + i + " \" >" + "<form id=\"contactForm1\" action=\"http://10.129.149.7:7000/storeFeedback\" method=\"post\">" + "<div class=\"row\" >  <label class=\"btn btn-primary btn-s veryCold\"> <input type=\"radio\" name=\"options\" id=\"option1\" value=\"-3," + i + "\"> <span class=\"glyphicon\">very cold</span> </label> <label class=\"btn btn-primary btn-s cold\"> <input type=\"radio\" name=\"options\" id=\"option2\" value=\"-2," + i + "\"> <span class=\"glyphicon\">cold</span> </label> <label class=\"btn btn-primary btn-s slightlyCold\"> <input type=\"radio\" name=\"options\" id=\"option3\" value=\"-1," + i + "\"> <span class=\"glyphicon\">slightly cold</span> </label> </div> <div class=\"row\" class=\"text-center\" >  <label class=\"btn btn-success btn-s neutral\"> <input type=\"radio\" name=\"options\" id=\"option4\" value=\"0," + i + "\"> <span class=\"glyphicon\">neutral</span> </label> </div> <div class=\"row\"> <label class=\"btn btn-primary btn-s slightlyWarm\"> <input type=\"radio\" name=\"options\" id=\"option5\" value=\"1," + i + "\"> <span class=\"glyphicon\">slightly warm</span> </label> <label class=\"btn btn-warning btn-s warm \"> <input type=\"radio\" name=\"options\" id=\"option6\" value=\"2," + i + "\"> <span class=\"glyphicon\">warm</span> </label>  <label class=\"btn btn-danger btn-s hot\"> <input type=\"radio\" name=\"options\" id=\"option7\" value=\"3," + i + "\"> <span class=\"glyphicon\">hot</span>  </label>  </div>   <input type=\"submit\" value=\"Submit\" class=\"btn btn-success\"> </form>" + "</div>";
+                modal_ += "<div class=\"modal-footer\"> <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\" style=\"box-shadow:none\">Close</button>";
+                modal_ += "</div></div></div></div>";
+                document.writeln(modal_);
+                i++;
+
+            }
+            document.writeln(seat);
+        }
+    </script>
+    <style>
+        button {
+            height: 30px;
+            width: 90px;
+            background-color: #f90100;
+            border: none !important;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        button:hover {
+            border: none !important;
+        }
+        
+        button:focus {
+            border: none !important;
+        }
+        
+        .row {
+            margin: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .seat {
+            height: 40px;
+            width: 30px;
+        }
+        
+        .veryCold {
+            background-color: #5ba5cd;
+            color: #000000;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .cold {
+            background-color: #8dc3de;
+            color: #000000;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .slightlyCold {
+            color: #000000;
+            background-color: #bcd9e5;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .neutral {
+            color: #000000;
+            background-color: #bfbfbf;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .slightlyWarm {
+            color: #000000;
+            background-color: #ceb3ae;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .warm {
+            color: #000000;
+            background-color: #b37e75;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        .hot {
+            background-color: #8f3f32;
+            color: #000000;
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+        
+        img {
+            width: 100%;
+            max-width: 80%;
+            height: 80%;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .main_div {
+            margin-top: 100px;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <div class="container" style="width: 600px;">
+        <div class="main_div">
+            <nav class="navbar navbar-inverse">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="#">Thermal Heat Map of Seil Lab</a>
+                        <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" data-target="#info" style="margin-left: 200px;">Click Me</button>
+                    </div>
+                    <!-- Modal -->
+                    <div id="info" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" style="box-shadow: none !important;">&times;</button>
+                                    <h4 class="modal-title">Thermal Comfort</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p>A person seat is represented by a button. They have a particular color. This color shows the temperature experienced by that particular person. </p>
+                                    <p>For example if Hareesh seat has red color, it means temperature is 27 deg celcius or above.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <!-- <button type="button" class="btn btn-default" data-dismiss="modal" style="box-shadow: none !important;">Close</button> -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- </div> -->
+            </nav>
+
+            <div class="row">
+                <center>
+                    <button type="button" class="btn btn-primary btn-md" value="ENTRY" id="ENTRY">
+                <b>Entry Gate</b>
+            </button>
+                </center>
+            </div>
+
+
+
+
+
+
+
+            <div class="row">
+                <center>
+
+                    <script>
+                        generateSeats(1, 1, "Akshay");
+                    </script>
+                    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                    <script>
+                        generateSeats(2, 1, "Adi");
+                    </script>
+                    &emsp;
+                    <script>
+                        generateSeats(3, 1, "Chaitra");
+                    </script>
+                </center>
+            </div>
+            <div class="row">
+                <center>
+                    <script>
+                        generateSeats(4, 1, "San");
+                    </script>
+                    &emsp;
+                    <button type="button" class="btn btn-success btn-md" value="AC2" id="AC2">
+                AC2
+            </button>
+                    <script>
+                        generateSeats(5, 1, "Mahesh");
+                    </script>
+                    &emsp;
+                    <script>
+                        generateSeats(6, 1, "Bh");
+                    </script>
+                </center>
+            </div>
+
+
+            <div class="row">
+                <center>
+                    <script>
+                        generateSeats(7, 1, "Som");
+                    </script>
+                    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+
+                    <script>
+                        generateSeats(8, 1, "Ni");
+                    </script>
+                    &emsp;
+                    <script>
+                        generateSeats(9, 1, "Anshul");
+                    </script>
+                </center>
+            </div>
+
+
+            <div class="row">
+                <center>
+
+                    <script>
+                        generateSeats(10, 1, "Su");
+                    </script>
+                    &emsp;
+                    <button type="button" class="btn btn-success btn-md" value="AC1" id="AC1">
+                AC1
+            </button>
+                    <script>
+                        generateSeats(11, 1, "Gowri");
+                    </script>
+                    &emsp;
+                    <script>
+                        generateSeats(12, 1, "SP");
+                    </script>
+                </center>
+            </div>
+
+
+            <div class="row">
+                <center>
+
+
+                    <!-- <button type="button" class="btn btn-warning btn-s">Rack</button> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; -->
+                    <script>
+                        generateSeats(13, 1, "Rack");
+                    </script>
+                    &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;
+                    <script>
+                        generateSeats(14, 1, "Ank");
+                    </script>
+                    &emsp;
+                    <script>
+                        generateSeats(15, 1, "Sh");
+                    </script>
+
+                </center>
+            </div>
+
+            <h4 class="text-center">
+                <font color="red">Click on your name to give us the feedback.</font>
+            </h4>
+
+            <br />
+            <div class="row">
+                <center>
+                    <img style="width:200%" src="colorBar.png">
+                </center>
+            </div>
+            </div>
+            <!--<div class="page-header">
+ 	<h2 align="center">Seil Lab</h2>
+   </div> -->
+
+
+
+
+        </div>
+        <!-- /.container -->
+        <!-- script references -->
+
+
+</body>
+
+</html>

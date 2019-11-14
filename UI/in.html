@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<title>Tagging Application</title>
+		<meta name="generator" content="Bootply" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<!--[if lt IE 9]>
+			<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		<link href="css/styles.css" rel="stylesheet">
+	</head>
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" >
+		
+		var tag = "";
+		var predicted = "" ;
+		var  blink = 0 ;
+		var old_obj = null;
+		$(document).ready(function(){
+		
+				
+				//-----------------------------------------changes made to in.html----------------------------------//
+		function show_predicted_name()
+	      	{
+		  $.ajax({
+		  type:"GET",
+	          dataType:"JSONP",
+		  url:"http://10.129.23.100:7000/predicted-name",
+	          success:function(data)
+	          {
+		        predicted = data ;
+			if (data != '')
+			{
+			      var obj = $('button[type=button][value='+data+']') // get the dom  element
+			      old_obj = obj; //storing previous DOM object
+			      if (obj != null) // handling wrong case: i dunno which one
+			      {	
+				     if (blink==0)
+			             {
+					    blink = 1;
+					    obj.addClass('btn-success');
+					    console.log(blink);
+	                              }
+				     else if(blink ==1)
+				     {
+					    blink = 0;
+					    obj.removeClass('btn-success');
+			                    console.log(blink);
+				      }						
+			       }
+
+			}
+			else if (data == '')
+			{
+				if (old_obj != null)
+				{	
+				      old_obj.removeClass('btn-success') ;
+				      old_obj = null ;
+			        }
+			}
+		  } 
+		});
+		}
+		function update_tag(tag)
+            	{
+		 $.ajax({
+		 type:"GET",
+		 dataType:"JSONP",
+		 url:"http://10.129.23.100:7000/update-tag",
+		 data:{'name':tag},
+		 success:function(data){
+		 console.log("Updated DB");
+		 console.log(data)
+		 if (data == 1)
+		 {
+		 	//var msg = "Thank you " + tag + " !";
+		 	//setTimeout(function() { alert(msg); });
+		 	//tempAlert(msg, 3000);
+		 }
+		 else
+		 {
+		 	//var msg = "No update for " + tag + " !";
+		 	//var r = confirm("Please Update");
+			//setTimeout(function() { alert(msg); });
+	         	//tempAlert(msg, 3000);
+		  }
+             }	
+	    });
+      	  }			
+//********************************************changes made to in.html********************************************//	
+	
+		
+				function make_entry(tag)
+				{
+					$.ajax({
+						type:"GET",
+						dataType:"JSONP",
+						url:"http://10.129.23.100:7000/in_entry",
+						data:{'name':tag},
+						success:function(data){
+								console.log("Updated DB");
+								console.log(data);
+							}
+					
+					});
+				} 
+
+				function update_people_count(count_index, info)
+				{
+					var people_count_index =  count_index;
+					$("#people-count").html(function(people_count_index, old){
+						if (old != info[people_count_index])
+						{
+							return info[people_count_index];
+						}
+
+
+					});
+				}
+
+				function update_people_names(start_index, info)
+				{
+					console.log("update people names")
+					var name_list = "";
+					
+					if (info[start_index] !=  "No Occupancy" )
+					{
+					
+						for (var i = 1; i < info.length-1; i++) {
+							console.log(info.length);
+							name_list = name_list + info[i] + ",";
+							var obj = $('button[type=button][value='+info[i]+']') // get the dom  element
+
+								if (obj != null)
+								{
+										obj.addClass('btn-success');
+								}
+								
+							
+
+
+						};
+						
+					
+						name_list += info[i]
+						var obj = $('button[type=button][value='+info[i]+']') // get the dom  element
+
+								if (obj != null)
+								{
+										obj.addClass('btn-success');
+								}
+							
+					}
+					else
+					{
+						name_list = info[start_index]
+					}
+
+					console.log(name_list);
+
+					$("#people-names").html(function(start_index, old){
+						console.log(name)
+						if (old != name_list)
+						{
+							/*if (name_list == "No Occupancy")
+							{
+								clear_all_buttons(old);
+							}*/
+							if (old != "No Occupancy" && old != "None")
+								{
+									if  (name_list.length < old.length || name_list == "No Occupancy")
+										{remove_green_buttons(old, name_list)}
+								}
+								
+								
+							return name_list;
+							
+						}
+
+
+					});
+
+				}
+				
+				function clear_all_buttons(old)
+				{
+					var oldn = old.split(",");
+					for (var i = 0; i < oldn.length; i++) {
+						var obj = $('button[type=button][value='+oldn[i]+']') // get the dom  element
+							
+						if (obj != null)
+						{
+								obj.removeClass('btn-success');
+						}
+						
+					}
+					
+				}
+				
+				function remove_green_buttons(old, newl)
+				{
+					console.log("green buttons")
+					var oldn = old.split(",");
+					console.log(old);
+					var newn = newl.split(",");
+					console.log(newl);
+					for (var i = 0; i < oldn.length; i++) {
+						if (newn.indexOf(oldn[i]) == -1)
+						{
+							var obj = $('button[type=button][value='+oldn[i]+']') // get the dom  element
+							
+							if (obj != null)
+							{
+									obj.removeClass('btn-success');
+							}
+						}
+					};
+				}
+			
+
+				function show_names()
+				{
+					$.ajax({
+						type:"GET",
+						dataType:"JSONP",
+						url:"http://10.129.23.100:7000/get_count_and_names",
+						//data:{'name':tag},
+						success:function(data){
+								console.log(data);
+
+								var info = data.split(",");
+								console.log(info);
+								update_people_count(0,info); // updating people count in the people count division
+								//if (info[0] != "0")
+									update_people_names(1,info); //updating people names in the people name division
+								//else
+								//{
+								//	$("#people-names").html("No Occupancy");
+								//}
+							}
+					
+					});
+				} 
+
+				//-----------------------------height & Weight------------------------------
+
+				function update_ts(data)
+				{
+					$("#ts").html(data);
+				}
+				function show_predicted()
+				{
+					$.ajax({
+						type:"GET",
+						dataType:"JSONP",
+						url:"http://10.129.23.100:7000/height_weight",
+						//data:{'name':tag},
+						success:function(data){
+								console.log(data);
+								update_ts(data);
+							}
+					
+					});
+				} 
+				
+				for(i = 1; i <=20 ; i++ )
+				{
+					var btn_id = "#tag_btn"+ i;
+					console.log(btn_id);
+					$(btn_id).click(function update()
+					{
+								console.log(this.value);
+								tag = this.value;
+								
+								var confirm_str = "Confirm your name!\nTagged as " + tag +" ?";
+								var r = confirm(confirm_str);
+								if (r == true) {
+									console.log("Confirmed the tag");
+									make_entry(tag); // add entry to the database
+									var obj = $('button[type=button][value='+tag+']') // get the dom  element
+
+									if (obj != null)
+									{
+										obj.addClass('btn-success');
+									}
+                                                                        update_tag(tag);
+												
+									
+								} else {
+									console.log("tag not confirmed");
+								}
+								
+					});
+				}
+				setInterval(function(){show_predicted_name()},700) ;
+				setInterval(function(){show_names()},1400) ;
+				setInterval(function(){show_predicted()},1500) ;
+			
+		});
+	
+	</script>
+	
+	
+	<body>
+<div class="navbar navbar-default navbar-static-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Tag Yourself !</a>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home</a></li>
+        
+      </ul>
+      
+    </div><!--/.nav-collapse -->
+  </div>
+</div>
+
+<div class="container">
+  
+  <div class="row">
+	  <div class="col-xs-2" >
+		<button type="button" class="btn btn-default btn-lg" value="uddhav" id="tag_btn1">
+			<span id="uddhav_txt">Uddhav </span>
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="malvika" id="tag_btn2">
+			<span id="vivekc_txt">Malvika</span>
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="anshul" id="tag_btn3">
+		Anshul
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="hardik" id="tag_btn4">
+			Hardik
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="bhushan" id="tag_btn5">
+			Bhushan
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="rohit" id="tag_btn6">
+			Rohit
+		</button>
+		</div>
+	</div>
+
+
+	</br></br></br>
+
+
+  <div class="row">
+	  
+	  
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="chaitra" id="tag_btn7">
+		Chaitra
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="karanj" id="tag_btn8">
+			Karan J
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="pawan" id="tag_btn9">
+			Pawan
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="hareesh" id="tag_btn10">
+			Hareesh
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="ayush" id="tag_btn11">
+		Ayush
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="priyanka" id="tag_btn12">
+			Priyanka
+		</button>
+	  </div>
+	</div>
+ 
+	</br></br></br>
+	 
+	  <div class="row">
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="krithi" id="tag_btn13">
+			Krithi
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="shobhana" id="tag_btn14">
+			Shobhana
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="spoorthy" id="tag_btn15">
+			Spoorthy
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="cynthia" id="tag_btn16">
+			Cynthia
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="siddharth" id="tag_btn17">
+			Siddharth
+		</button>
+	  </div>
+	  <div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="kevin" id="tag_btn18">
+		Kevin
+		</button>
+	  </div>
+	  
+	</div>
+	
+	</br> </br> </br>
+	<div class="col-xs-2">
+		<button type="button" class="btn btn-default btn-lg" value="akshay" id="tag_btn19">
+			Akshay
+		</button>
+		</div>
+	<div class="row">
+		<div class="col-xs-2">
+			<button type="button" class="btn btn-default btn-lg" value="guest" id="tag_btn20">
+			Guest
+		</div>
+	</div>
+ 
+ 	<br><br><br><br>
+	<div class="row">
+		<div class="col-xs-6">
+			People in Lab
+			<p id="people-names">None</p>
+	    </div>
+<br>
+<br>
+<br>
+
+
+	    <div class="col-xs-6">
+			People count
+			<p id="people-count"> 0 </p>
+	    </div>
+		   <div class="col-xs-6">
+			<p id="ts"> -1 </p>
+	    </div>
+
+
+	</div>
+  
+</div><!-- /.container -->
+	<!-- script references -->
+		
+	</body>
+</html>
